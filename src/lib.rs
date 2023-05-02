@@ -90,11 +90,9 @@ pub fn Nodes(cx: Scope, nodes: ReadSignal<Vec<Node>>) -> impl IntoView {
       <For
         each=nodes
         key= |node| node.id.clone()
-        view = move |cx, node| {
+        view = move |cx, _node| {
             view! {cx,
-              <g transform=node.transform>
                 <rect width=200 height=200 class="fill-white stroke-gray-300" />
-              </g>
             }
         }
       />
@@ -108,11 +106,9 @@ pub fn Selection(cx: Scope, selected_nodes: ReadSignal<Vec<SelectedNode>>) -> im
       <For
         each=selected_nodes
         key= |selected_node| selected_node.id.clone()
-        view = move |cx, selected_node| {
+        view = move |cx, _selected_node| {
             view! {cx,
-              <g transform=selected_node.transform>
                 <rect width=200 height=200 class="fill-purple-300/40 stroke-purple-300/40" />
-              </g>
             }
         }
       />
