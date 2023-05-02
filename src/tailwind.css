@@ -1,0 +1,11 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --colNum: 0;
+}
+
+#layout {
+  grid-template-columns: repeat(var(--colNum), auto);
+}
