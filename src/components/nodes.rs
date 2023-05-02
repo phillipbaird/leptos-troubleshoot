@@ -1,6 +1,6 @@
 use leptos::*;
 
-use crate::{constants::*, event_model::types::NodeType, signals::Node};
+use crate::{constants::*, signals::Node};
 
 #[component]
 pub fn Nodes(cx: Scope, nodes: ReadSignal<Vec<Node>>) -> impl IntoView {
@@ -9,7 +9,7 @@ pub fn Nodes(cx: Scope, nodes: ReadSignal<Vec<Node>>) -> impl IntoView {
         each=nodes
         key= |node| node.id.clone()
         view = move |cx, node| {
-            let node_style = svg_style(&node.node_type);
+            let node_style = "fill-white stroke-gray-300";
             view! {cx,
               <g transform=node.transform>
                 <rect width=NODE_WIDTH height=NODE_HEIGHT class=node_style />
@@ -22,14 +22,5 @@ pub fn Nodes(cx: Scope, nodes: ReadSignal<Vec<Node>>) -> impl IntoView {
         }
       />
 
-    }
-}
-
-fn svg_style(node_type: &NodeType) -> &'static str {
-    match node_type {
-        NodeType::Role => "fill-white stroke-gray-300",
-        NodeType::Command => "fill-blue-200",
-        NodeType::Event => "fill-yellow-200",
-        NodeType::View => "fill-green-200",
     }
 }

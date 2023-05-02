@@ -9,8 +9,7 @@ use components::nodes::*;
 use components::selections::*;
 use signals::WorkflowSignals;
 
-use crate::event_model::events::Event;
-use crate::event_model::types::{CursorId, NodeId, NodeType};
+use crate::event_model::Event;
 
 #[component]
 pub fn App(cx: Scope) -> impl IntoView {
@@ -20,21 +19,17 @@ pub fn App(cx: Scope) -> impl IntoView {
     let workflow_signals: WorkflowSignals = WorkflowSignals::new(cx);
 
     // Load demo data.
-    let test_node_id = NodeId::new();
+    let test_node_id = uuid::Uuid::new_v4(); // NodeId::new();
     workflow_signals.evolve(Event::NodeCreated {
         id: test_node_id.clone(),
         label: "Some Node".to_owned(),
-        node_type: NodeType::Role,
         row: 0,
         col: 1,
     });
 
-    let our_cursor_id = CursorId::new();
+    let our_cursor_id = uuid::Uuid::new_v4();
     workflow_signals.evolve(Event::CursorCreated {
         id: our_cursor_id.clone(),
-        label: "You".to_owned(),
-        row: 0,
-        col: 1,
     });
 
     // ---- Event Listeners ----
