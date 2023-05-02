@@ -1,6 +1,6 @@
 use leptos::*;
 
-use crate::{constants::*, event_model::Event};
+use crate::constants::*;
 
 #[derive(Debug, Clone)]
 pub struct Cursor {
@@ -28,36 +28,26 @@ impl Cursor {
 #[derive(Debug, Clone)]
 pub struct Node {
     pub id: uuid::Uuid,
-    pub label: ReadSignal<String>,
     pub row: ReadSignal<usize>,
     pub col: ReadSignal<usize>,
     pub transform: Signal<String>,
-    _set_label: WriteSignal<String>,
-    set_row: WriteSignal<usize>,
-    set_col: WriteSignal<usize>,
+    _set_row: WriteSignal<usize>,
+    _set_col: WriteSignal<usize>,
 }
 
 impl Node {
-    pub fn new(cx: Scope, id: uuid::Uuid, label: String, row: usize, col: usize) -> Self {
-        let (label, _set_label) = create_signal(cx, label);
-        let (row, set_row) = create_signal(cx, row);
-        let (col, set_col) = create_signal(cx, col);
+    pub fn new(cx: Scope, id: uuid::Uuid, row: usize, col: usize) -> Self {
+        let (row, _set_row) = create_signal(cx, row);
+        let (col, _set_col) = create_signal(cx, col);
         let transform = Signal::derive(cx, move || node_transform(row(), col()));
         Node {
             id,
-            label,
             row,
             col,
             transform,
-            _set_label,
-            set_row,
-            set_col,
+            _set_row,
+            _set_col,
         }
-    }
-
-    pub fn set_row_col(&self, row: usize, col: usize) {
-        self.set_row.set(row);
-        self.set_col.set(col);
     }
 }
 
@@ -90,6 +80,26 @@ impl Pos {
     }
 }
 
+#[derive(Debug, Clone)]
+pub enum Event {
+    CursorCreated {
+        id: uuid::Uuid,
+    },
+    NodeCreated {
+        id: uuid::Uuid,
+        row: usize,
+        col: usize,
+    },
+    NodeDeselected {
+        cursor_id: uuid::Uuid,
+        node_id: uuid::Uuid,
+    },
+    NodeSelected {
+        cursor_id: uuid::Uuid,
+        node_id: uuid::Uuid,
+    },
+}
+
 #[derive(Clone)]
 pub struct WorkflowSignals {
     cx: Scope,
@@ -118,14 +128,9 @@ impl WorkflowSignals {
                 let new_cursor = Cursor::new(self.cx, id.clone());
                 self.set_cursors.update(|cs| cs.push(new_cursor));
             }
-            Event::NodeCreated {
-                id,
-                label,
-                row,
-                col,
-            } => {
+            Event::NodeCreated { id, row, col } => {
                 self.set_nodes
-                    .update(|ns| ns.push(Node::new(self.cx, id, label, row, col)));
+                    .update(|ns| ns.push(Node::new(self.cx, id, row, col)));
             }
             Event::NodeDeselected { cursor_id, node_id } => {
                 self.with_cursor(&cursor_id, |c| {
