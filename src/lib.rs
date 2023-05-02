@@ -7,27 +7,20 @@ use signals::WorkflowSignals;
 
 use crate::{
     constants::*,
-    signals::{Cursor, Event, Node, SelectedNode},
+    signals::{Cursor, Node, SelectedNode},
 };
 
 #[component]
 pub fn App(cx: Scope) -> impl IntoView {
     let (selected, set_selected) = create_signal(cx, false);
 
-    // Signals updated from domain model.
     let workflow_signals: WorkflowSignals = WorkflowSignals::new(cx);
 
     // Load demo data.
     let test_node_id = uuid::Uuid::new_v4();
-    workflow_signals.evolve(Event::NodeCreated {
-        id: test_node_id.clone(),
-        row: 0,
-        col: 1,
-    });
+    workflow_signals.create_node(test_node_id.clone(), 0, 1);
     let our_cursor_id = uuid::Uuid::new_v4();
-    workflow_signals.evolve(Event::CursorCreated {
-        id: our_cursor_id.clone(),
-    });
+    workflow_signals.create_cursor(our_cursor_id.clone());
 
     // ---- Event Listeners ----
 
@@ -35,16 +28,10 @@ pub fn App(cx: Scope) -> impl IntoView {
     window_event_listener_untyped("keydown", move |ev: web_sys::Event| {
         ev.prevent_default();
         if selected.get_untracked() {
-            workflow_signals_clone.evolve(Event::NodeDeselected {
-                cursor_id: our_cursor_id.clone(),
-                node_id: test_node_id.clone(),
-            });
+            workflow_signals_clone.deselect_node(our_cursor_id.clone(), test_node_id.clone());
             set_selected.set_untracked(false);
         } else {
-            workflow_signals_clone.evolve(Event::NodeSelected {
-                cursor_id: our_cursor_id.clone(),
-                node_id: test_node_id.clone(),
-            });
+            workflow_signals_clone.select_node(our_cursor_id.clone(), test_node_id.clone());
             set_selected.set_untracked(true);
         }
     });
@@ -67,6 +54,25 @@ pub fn App(cx: Scope) -> impl IntoView {
           </svg>
         </div>
       </main>
+    }
+}
+
+#[component]
+pub fn Nodes(cx: Scope, nodes: ReadSignal<Vec<Node>>) -> impl IntoView {
+    view! { cx,
+      <For
+        each=nodes
+        key= |node| node.id.clone()
+        view = move |cx, node| {
+            let node_style = "fill-white stroke-gray-300";
+            view! {cx,
+              <g transform=node.transform>
+                <rect width=NODE_WIDTH height=NODE_HEIGHT class=node_style />
+              </g>
+            }
+        }
+      />
+
     }
 }
 
@@ -95,35 +101,12 @@ pub fn Selections(cx: Scope, cursors: ReadSignal<Vec<Cursor>>) -> impl IntoView 
         each=cursors
         key= |c| c.id.clone()
         view = move |cx, cursor| {
-          let selection_transform = Signal::derive(cx, move ||
-            (cursor.selection_transform)().to_transform()
-          );
-
           view! {cx,
-            <g transform=selection_transform>
+            <g>
               <Selection selected_nodes=cursor.selected_nodes/>
             </g>
           }
         }
       />
-    }
-}
-
-#[component]
-pub fn Nodes(cx: Scope, nodes: ReadSignal<Vec<Node>>) -> impl IntoView {
-    view! { cx,
-      <For
-        each=nodes
-        key= |node| node.id.clone()
-        view = move |cx, node| {
-            let node_style = "fill-white stroke-gray-300";
-            view! {cx,
-              <g transform=node.transform>
-                <rect width=NODE_WIDTH height=NODE_HEIGHT class=node_style />
-              </g>
-            }
-        }
-      />
-
     }
 }
