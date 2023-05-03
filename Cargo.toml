@@ -5,8 +5,7 @@ edition = "2021"
 
 [dependencies]
 leptos = { git = "https://github.com/leptos-rs/leptos.git" }
-web-sys = { version = "0.3", features = ["Window", "Document", "Element", "DomRect", "Node", "CssStyleDeclaration", "SvgElement", "SvgsvgElement", "SvgGraphicsElement", "EventTarget"] }
-uuid = { version = "1.3.0", features = ["js", "v4"] }
+web-sys = { version = "0.3", features = ["EventTarget"] }
 console_log = "0.2.1"
 console_error_panic_hook = "0.1.7"
 log = "0.4.17"
